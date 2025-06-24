@@ -10,20 +10,48 @@ const PORT = process.env.PORT || 5001;
 app.use(cors());
 app.use(express.json());
 
+// Trust proxy for proper IP detection (important for Nginx reverse proxy)
+app.set('trust proxy', true);
+
 // Create logs directory if it doesn't exist
 const logsDir = path.join(__dirname, 'logs');
 if (!fs.existsSync(logsDir)) {
   fs.mkdirSync(logsDir);
 }
 
-// Function to get client IP address
+// Function to get client IP address (handles proxy headers from Nginx)
 const getClientIP = (req) => {
+  // Check proxy headers first (most reliable for Nginx reverse proxy)
+  const xForwardedFor = req.headers['x-forwarded-for'];
+  if (xForwardedFor) {
+    // X-Forwarded-For can contain multiple IPs, get the first one (original client)
+    const ips = xForwardedFor.split(',').map(ip => ip.trim());
+    return ips[0];
+  }
+  
+  // Check X-Real-IP header (set by Nginx)
+  const xRealIP = req.headers['x-real-ip'];
+  if (xRealIP) {
+    return xRealIP;
+  }
+  
+  // Check other proxy headers
+  const xClientIP = req.headers['x-client-ip'];
+  if (xClientIP) {
+    return xClientIP;
+  }
+  
+  // Check CF-Connecting-IP (Cloudflare)
+  const cfConnectingIP = req.headers['cf-connecting-ip'];
+  if (cfConnectingIP) {
+    return cfConnectingIP;
+  }
+  
+  // Fallback to connection IP (will be localhost for proxied requests)
   return req.ip || 
-         req.connection.remoteAddress || 
-         req.socket.remoteAddress ||
-         (req.connection.socket ? req.connection.socket.remoteAddress : null) ||
-         req.headers['x-forwarded-for']?.split(',')[0] ||
-         req.headers['x-real-ip'] ||
+         req.connection?.remoteAddress || 
+         req.socket?.remoteAddress ||
+         (req.connection?.socket ? req.connection.socket.remoteAddress : null) ||
          'unknown';
 };
 
