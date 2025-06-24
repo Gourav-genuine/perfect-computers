@@ -1,0 +1,25 @@
+{
+  "name": "perfect-computers-backend",
+  "version": "1.0.0",
+  "description": "Backend server for Perfect Computers e-commerce website with visitor logging",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "express",
+    "ecommerce",
+    "logging",
+    "perfect-computers"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "fs": "^0.0.1-security",
+    "path": "^0.12.7"
+  }
+}
