@@ -20,9 +20,8 @@ function App() {
     const logPageVisit = async () => {
       try {
         await ApiService.logVisitor('Homepage', 'initial_visit');
-        console.log('📊 Page visit logged to backend');
       } catch (error) {
-        console.log('⚠️ Could not log page visit (backend may be offline)');
+        // Silently handle logging errors - don't break user experience
       }
     };
 
@@ -137,11 +136,10 @@ function App() {
       const response = await ApiService.logOrder(orderData, grandTotal, cartItems);
       
       if (response.success) {
-        console.log('📦 Order logged successfully:', response.orderId);
         ApiService.logVisitor('Order Complete', `order_${response.orderId}_total_${grandTotal}`);
       }
     } catch (error) {
-      console.error('Error logging order:', error);
+      // Silently handle order logging errors
     }
     
     clearCart();
